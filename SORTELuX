@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rifa</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Escolha um número da rifa</h1>
+    <div id="numbers">
+        <!-- Botões para números da rifa -->
+        <script>
+            for (let i = 1; i <= 100; i++) {
+                document.write(`<button onclick="chooseNumber(${i})">${i}</button>`);
+            }
+        </script>
+    </div>
+    <div id="form" style="display: none;">
+        <h2>Cadastro para a rifa</h2>
+        <form id="raffleForm" onsubmit="submitForm(event)">
+            <input type="hidden" id="selectedNumber">
+            <label for="name">Nome:</label>
+            <input type="text" id="name" required><br>
+            <label for="phone">Telefone:</label>
+            <input type="text" id="phone" required><br>
+            <label for="pix">Chave Pix:</label>
+            <input type="text" id="pix" required><br>
+            <button type="submit">Enviar</button>
+        </form>
+    </div>
+    <script src="scripts.js"></script>
+</body>
+</html>
+styles.css:
+css
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 20px;
+}
+
+button {
+    margin: 5px;
+    padding: 10px;
+    font-size: 16px;
+}
+
+#form {
+    margin-top: 20px;
+}
+
+label {
+    display: inline-block;
+    width: 100px;
+    text-align: right;
+}
+
+input {
+    margin: 5px;
+}
+scripts.js:
+javascript
+function chooseNumber(number) {
+    document.getElementById('numbers').style.display = 'none';
+    document.getElementById('form').style.display = 'block';
+    document.getElementById('selectedNumber').value = number;
+}
+
+function submitForm(event) {
+    event.preventDefault();
+    const selectedNumber = document.getElementById('selectedNumber').value;
+    const name = document.getElementById('name').value;
+    const phone = document.getElementById('phone').value;
+    const pix = document.getElementById('pix').value;
+
+    fetch('/reserve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ number: selectedNumber, name, phone, pix })
+    }).then(response => response.json()).then(data => {
+        if (data.success) {
+            alert('Número reservado! Efetue o pagamento dentro de 15 minutos.');
+            // Temporário: Redirecionar para a tela de pagamento
+            window.location.href = `/pay/${selectedNumber}`;
+        } else {
+            alert('Número já reservado. Por favor, escolha outro.');
+            document.getElementById('numbers').style.display = 'block';
+            document.getElementById('form').style.display = 'none';
+        }
+    });
+}
